@@ -1,4 +1,4 @@
-import { handlePost } from './_NEWSTUFF'
+import { handlePost } from './pushnotifs'
 import {
   OutputSchema as RepoEvent,
   isCommit,

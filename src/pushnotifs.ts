@@ -1,6 +1,6 @@
 import { DidResolver } from '@atproto/did-resolver'
-import { Record } from '../lexicon/types/app/bsky/feed/post'
-import { CreateOp } from '../util/subscription'
+import { Record } from './lexicon/types/app/bsky/feed/post'
+import { CreateOp } from './util/subscription'
 
 type PushoverMessage = {
     message: string
@@ -28,7 +28,6 @@ export async function sendNotification(msg: PushoverMessage) {
 
 }
 
-
 function createPostLink(author: string, uri: string) {
     const postSlug = uri.split('/').at(-1)
     return `https://bsky.app/profile/${ author }/post/${ postSlug }`
@@ -41,16 +40,13 @@ async function getHandleFromDid(did: string, resolver: DidResolver) {
 }
 
 export async function handlePost(post: CreateOp<Record>, resolver: DidResolver) {
-    const messagePayload = {
-        title: `New post from ${ await getHandleFromDid(post.author, resolver) }`,
-        message: post.record.text,
-        url: createPostLink(post.author, post.uri),
-        url_title: "Post Link"
-    }
-
-    console.log('\n', messagePayload)
-    if (TO_INCLUDE_LIST.includes(post.author)
-        && !post.record.reply) {
-        await sendNotification(messagePayload)
+    if (TO_INCLUDE_LIST.includes(post.author) // Only people in the above list
+        && !post.record.reply) { // Only top level posts, no replies!
+        await sendNotification({
+            title: `New post from ${ await getHandleFromDid(post.author, resolver) }`,
+            message: post.record.text,
+            url: createPostLink(post.author, post.uri),
+            url_title: "Post Link"
+        })
     }
 }
