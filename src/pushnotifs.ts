@@ -12,6 +12,7 @@ type PushoverMessage = {
 const TO_INCLUDE_LIST = [
     'did:plc:3nodfbwjlsd77ckgrodawvpv', // Rem
     'did:plc:p3vdrhjpqfnrj5523b5dnl7c', // Stas
+    'did:plc:v72r2bhsatxikmiqogwg6vro', // Bee 🥺💖
     'did:plc:funyx6lhibbiivqw6lst7eik', // Me (Emma)
 ]
 
