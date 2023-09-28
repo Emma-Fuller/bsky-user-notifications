@@ -30,13 +30,14 @@ export class FeedGenerator {
   static create(cfg: Config) {
     const app = express()
     const db = createDb(cfg.sqliteLocation)
-    const firehose = new FirehoseSubscription(db, cfg.subscriptionEndpoint)
 
     const didCache = new MemoryCache()
     const didResolver = new DidResolver(
       { plcUrl: 'https://plc.directory' },
       didCache,
     )
+
+    const firehose = new FirehoseSubscription(db, cfg.subscriptionEndpoint, didResolver)
 
     const server = createServer({
       validateResponse: true,
@@ -46,7 +47,6 @@ export class FeedGenerator {
         blobLimit: 5 * 1024 * 1024, // 5mb
       },
     })
-    firehose.addServer(server)
     const ctx: AppContext = {
       db,
       didResolver,

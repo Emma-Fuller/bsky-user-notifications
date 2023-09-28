@@ -1,6 +1,13 @@
-import { Server } from '../lexicon'
+import { DidResolver } from '@atproto/did-resolver'
 import { Record } from '../lexicon/types/app/bsky/feed/post'
 import { CreateOp } from '../util/subscription'
+
+type PushoverMessage = {
+    message: string
+    title: string
+    url: string
+    url_title: string
+}
 
 const TO_INCLUDE_LIST = [
     'did:plc:3nodfbwjlsd77ckgrodawvpv', // Rem
@@ -8,16 +15,42 @@ const TO_INCLUDE_LIST = [
     'did:plc:funyx6lhibbiivqw6lst7eik', // Me (Emma)
 ]
 
-function createPostLink(author: String, uri: String) {
+export async function sendNotification(msg: PushoverMessage) {
+    const params = new URLSearchParams({
+        'token': process.env['PUSHOVER_TOKEN'] ?? '',
+        'user': process.env['PUSHOVER_USER'] ?? '',
+        ...msg
+    });
+
+    // @ts-ignore
+    const response = await fetch('https://api.pushover.net/1/messages.json', { method: 'POST', body: params })
+    console.log(await response.json())
+
+}
+
+
+function createPostLink(author: string, uri: string) {
     const postSlug = uri.split('/').at(-1)
     return `https://bsky.app/profile/${ author }/post/${ postSlug }`
 }
 
-export function handlePost(post: CreateOp<Record>, server: Server) {
-    const isFriend = TO_INCLUDE_LIST.includes(post.author)
-    if (!isFriend) return
+async function getHandleFromDid(did: string, resolver: DidResolver) {
+    const resolved = await resolver.resolveDid(did)
+    return '@' + (resolved?.alsoKnownAs?.[0] ?? 'at://unknown')
+        .replace('at://', '')
+}
 
-    console.log(post.record.text)
-    console.log(createPostLink(post.author, post.uri))
-    console.log('----------')
+export async function handlePost(post: CreateOp<Record>, resolver: DidResolver) {
+    const messagePayload = {
+        title: `New post from ${ await getHandleFromDid(post.author, resolver) }`,
+        message: post.record.text,
+        url: createPostLink(post.author, post.uri),
+        url_title: "Post Link"
+    }
+
+    console.log('\n', messagePayload)
+    if (TO_INCLUDE_LIST.includes(post.author)
+        && !post.record.reply) {
+        await sendNotification(messagePayload)
+    }
 }
