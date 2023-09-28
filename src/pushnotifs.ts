@@ -26,6 +26,7 @@ export async function sendNotification(msg: PushoverMessage) {
             ...msg
         })
     })
+    console.log("Push notification sent!")
 }
 
 function createPostLink(author: string, uri: string) {
@@ -40,6 +41,7 @@ async function getHandleFromDid(did: string, resolver: DidResolver) {
 }
 
 export async function handlePost(post: CreateOp<Record>, resolver: DidResolver) {
+    console.log(post.record.text)
     if (TO_INCLUDE_LIST.includes(post.author) // Only people in the above list
         && !post.record.reply) { // Only top level posts, no replies!
         await sendNotification({
