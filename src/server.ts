@@ -6,7 +6,6 @@ import { createServer } from './lexicon'
 import { createDb, Database, migrateToLatest } from './db'
 import { FirehoseSubscription } from './subscription'
 import { AppContext, Config } from './config'
-import wellKnown from './well-known'
 
 export class FeedGenerator {
   public app: express.Application
@@ -53,8 +52,6 @@ export class FeedGenerator {
       cfg,
     }
     app.use(server.xrpc.router)
-    app.use(wellKnown(ctx))
-
     return new FeedGenerator(app, db, firehose, cfg)
   }
 
