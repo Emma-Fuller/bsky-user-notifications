@@ -16,17 +16,16 @@ const TO_INCLUDE_LIST = [
     'did:plc:funyx6lhibbiivqw6lst7eik', // Me (Emma)
 ]
 
+declare function fetch(a: String, b: any): Promise<any>;
 export async function sendNotification(msg: PushoverMessage) {
-    const params = new URLSearchParams({
-        'token': process.env['PUSHOVER_TOKEN'] ?? '',
-        'user': process.env['PUSHOVER_USER'] ?? '',
-        ...msg
-    });
-
-    // @ts-ignore
-    const response = await fetch('https://api.pushover.net/1/messages.json', { method: 'POST', body: params })
-    console.log(await response.json())
-
+    await fetch('https://api.pushover.net/1/messages.json', {
+        method: 'POST',
+        body: new URLSearchParams({
+            'token': process.env['PUSHOVER_TOKEN'] ?? '',
+            'user': process.env['PUSHOVER_USER'] ?? '',
+            ...msg
+        })
+    })
 }
 
 function createPostLink(author: string, uri: string) {
